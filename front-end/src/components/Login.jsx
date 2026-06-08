@@ -15,23 +15,23 @@ export default function Login({ onSwitchToSignUp }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070d] flex items-center justify-center p-4 sm:p-6">
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#05070d] flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-3xl w-full flex flex-col md:flex-row">
         
-        <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-8 md:p-10">
-          <div className="w-full max-w-sm">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Welcome Back 👋
+        {/* Formulaire */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-5">
+          <div className="w-full max-w-xs">
+            <h1 className="text-xl font-bold text-gray-800 mb-1">
+              Welcome Back 🎉
             </h1>
 
-            <p className="text-gray-500 text-sm mb-6 md:mb-8">
-              Today is a new day. It's your day. Sign in to start managing your
-              projects.
+            <p className="text-gray-500 text-xs mb-4">
+              Sign in to start managing your projects.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-2">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-gray-600 mb-0.5">
                   Email
                 </label>
                 <input
@@ -39,13 +39,13 @@ export default function Login({ onSwitchToSignUp }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="example@gmail.com"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200"
+                  className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition duration-200"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-gray-600 mb-0.5">
                   Password
                 </label>
                 <div className="relative">
@@ -54,17 +54,16 @@ export default function Login({ onSwitchToSignUp }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 pr-12"
+                    className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-7 text-sm transition duration-200"
                     required
                     minLength={8}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                   >
-                    {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                    {showPassword ? <AiOutlineEyeInvisible size={14} /> : <AiOutlineEye size={14} />}
                   </button>
                 </div>
               </div>
@@ -72,8 +71,7 @@ export default function Login({ onSwitchToSignUp }) {
               <div className="text-right">
                 <button
                   type="button"
-                  onClick={() => console.log('Forgot password')}
-                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline focus:outline-none"
+                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline transition"
                 >
                   Forgot Password?
                 </button>
@@ -81,53 +79,54 @@ export default function Login({ onSwitchToSignUp }) {
 
               <button
                 type="submit"
-                className="w-full bg-gray-800 text-white py-3 rounded-xl font-medium hover:bg-gray-900 transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                className="w-full bg-gray-800 text-white py-1.5 rounded-lg font-medium hover:bg-gray-900 transition duration-200 transform hover:scale-[1.02] mt-1"
               >
                 Sign In
               </button>
             </form>
 
-            <div className="flex items-center gap-3 my-6">
+            <div className="flex items-center gap-2 my-3">
               <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-gray-400 text-sm">Or</span>
+              <span className="text-gray-400 text-xs">Or</span>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            <div className="space-y-3">
-              <button className="w-full border border-gray-200 rounded-xl py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200">
-                <FcGoogle size={20} />
-                <span className="text-gray-700">Sign in with Google</span>
+            <div className="space-y-1.5">
+              <button className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200 text-xs">
+                <FcGoogle size={14} />
+                <span>Sign in with Google</span>
               </button>
 
-              <button className="w-full border border-gray-200 rounded-xl py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200">
-                <FaFacebookF className="text-blue-600" size={18} />
-                <span className="text-gray-700">Sign in with Facebook</span>
+              <button className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200 text-xs">
+                <FaFacebookF className="text-blue-600" size={12} />
+                <span>Sign in with Facebook</span>
               </button>
             </div>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-xs text-gray-500 mt-3">
               Don't have an account?{" "}
               <button
                 type="button"
                 onClick={onSwitchToSignUp}
-                className="text-blue-600 font-medium hover:underline focus:outline-none"
+                className="text-blue-600 font-medium hover:underline transition"
               >
                 Sign Up
               </button>
             </p>
 
-            <p className="text-center text-xs text-gray-400 mt-8 md:mt-10">
+            <p className="text-center text-[10px] text-gray-400 mt-3">
               © 2025 ALL RIGHTS RESERVED
             </p>
           </div>
         </div>
 
-        <div className="hidden md:block md:w-1/2 p-4">
-          <div className="h-full rounded-2xl overflow-hidden shadow-lg">
+        {/* Image avec animation au survol */}
+        <div className="hidden md:block md:w-1/2 overflow-hidden">
+          <div className="h-full overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&h=1000&fit=crop"
-              alt="Decorative flowers"
-              className="w-full h-full object-cover transition duration-700 hover:scale-105"
+              src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=500&fit=crop"
+              alt="flowers"
+              className="w-full h-full object-cover transition-all duration-500 ease-in-out hover:scale-110 hover:rotate-1"
             />
           </div>
         </div>

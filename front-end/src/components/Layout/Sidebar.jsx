@@ -1,5 +1,6 @@
-// src/components/Layout/Sidebar.jsx - Version sans React Router
+// src/components/Layout/Sidebar.jsx
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   AiOutlineHome, 
   AiOutlineCreditCard, 
@@ -8,12 +9,12 @@ import {
   AiOutlineLogout 
 } from "react-icons/ai";
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen, onLogout, onNavigate, currentPage }) {
+export default function Sidebar({ sidebarOpen, setSidebarOpen, onLogout }) {
   const menuItems = [
-    { id: 'accueil', name: 'Accueil', icon: <AiOutlineHome size={20} /> },
-    { id: 'carte', name: 'Carte', icon: <AiOutlineCreditCard size={20} /> },
-    { id: 'profile', name: 'Profil', icon: <AiOutlineUser size={20} /> },
-    { id: 'settings', name: 'Paramètres', icon: <AiOutlineSetting size={20} /> },
+    { path: '/', name: 'Accueil', icon: <AiOutlineHome size={20} /> },
+    { path: '/carte', name: 'Carte', icon: <AiOutlineCreditCard size={20} /> },
+    { path: '/profile', name: 'Profil', icon: <AiOutlineUser size={20} /> },
+    { path: '/settings', name: 'Paramètres', icon: <AiOutlineSetting size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -33,7 +34,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, onLogout, onNavig
       {/* Sidebar */}
       <aside
         className={`fixed md:relative z-30 bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 min-h-screen transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         {/* Logo / Titre */}
@@ -46,24 +47,24 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, onLogout, onNavig
           </div>
         </div>
         
-        {/* Menu de navigation */}
+        {/* Menu de navigation avec NavLink */}
         <nav className="mt-6">
           {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                onNavigate(item.id);
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-5 py-3 mx-2 w-full rounded-lg transition duration-200 ${
-                currentPage === item.id
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-5 py-3 mx-2 rounded-lg transition duration-200 ${
+                  isActive
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`
+              }
             >
               {item.icon}
               <span className="text-sm">{item.name}</span>
-            </button>
+            </NavLink>
           ))}
         </nav>
         

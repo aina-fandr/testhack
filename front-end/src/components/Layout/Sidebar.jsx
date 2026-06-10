@@ -1,6 +1,7 @@
 // src/components/Layout/Sidebar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { FiUsers } from 'react-icons/fi';
 import {
     AiOutlineHome,
     AiOutlineCreditCard,
@@ -17,6 +18,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, onLogout }) {
         { path: '/ia', name: 'Assistant IA', icon: <AiOutlineRobot size={20} /> },
         { path: '/profile', name: 'Profil', icon: <AiOutlineUser size={20} /> },
         { path: '/settings', name: 'Paramètres', icon: <AiOutlineSetting size={20} /> },
+        { path: '/admin/users', name: 'Utilisateurs', icon: <FiUsers size={20} /> }
     ];
 
     const handleLogout = () => {

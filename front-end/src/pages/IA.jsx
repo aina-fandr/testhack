@@ -8,7 +8,7 @@ export default function IA() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre assistant IA (ChatGPT). Posez-moi toutes vos questions ! 🤖",
+      text: "Bonjour ! Je suis votre assistant IA (Geminini). Posez-moi toutes vos questions ! 🤖",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -76,7 +76,7 @@ export default function IA() {
     <div className="h-full flex flex-col">
       <div className="mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-gray-800">Assistant IA 🤖</h1>
-        <p className="text-gray-500 text-sm">Alimenté par ChatGPT - Posez-moi toutes vos questions !</p>
+        <p className="text-gray-500 text-sm">Alimenté par Gemini - Posez-moi toutes vos questions !</p>
       </div>
 
       <div className="flex-1 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
@@ -139,7 +139,7 @@ export default function IA() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Posez votre question à ChatGPT..."
+              placeholder="Posez votre question à Gemini..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               disabled={isLoading}
             />

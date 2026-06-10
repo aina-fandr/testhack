@@ -39,8 +39,8 @@ function App() {
   if (!isAuthenticated) {
     return (
       <Routes>
-        <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
-        <Route path="/signup" element={<SignUp onSignUpSuccess={handleLogin} />} />
+        <Route path="/login" element={<Login onLoginSuccess={handleLogin} onSwitchToSignUp={() => navigate('/signup')} />} />
+        <Route path="/signup" element={<SignUp onSwitchToLogin={() => navigate('/login')} />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -48,13 +48,11 @@ function App() {
 
   // Si authentifié
   return (
-    <Layout onLogout={handleLogout}>
-      <Routes>
-        <Route path="/" element={<Accueil />} />
-        <Route path="/carte" element={<Carte />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      <Route path="/login" element={<Login onLoginSuccess={handleLogin} onSwitchToSignUp={() => navigate('/signup')} />} />
+      <Route path="/signup" element={<SignUp onSwitchToLogin={() => navigate('/login')} />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 

@@ -1,8 +1,9 @@
-// src/components/Login.jsx
 import React, { useState } from 'react';
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useGoogleLogin } from '@react-oauth/google';
+import { login, loginWithGoogle } from '../services/login_api';
 
 export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -11,64 +12,57 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // 1. Soumission du Formulaire Classique (Email + Mot de passe)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulation d'une requête API (attendre 1 seconde)
-    setTimeout(() => {
-      // Validation simple
-      if (!email || !password) {
-        setError('Veuillez remplir tous les champs');
-        setIsLoading(false);
-        return;
-      }
-
-      if (password.length < 8) {
-        setError('Le mot de passe doit contenir au moins 8 caractères');
-        setIsLoading(false);
-        return;
-      }
-
-      // Simulation d'email valide
-      if (!email.includes('@')) {
-        setError('Veuillez entrer un email valide');
-        setIsLoading(false);
-        return;
-      }
-
-      // Connexion réussie
-      console.log('Connexion réussie:', { email, password });
-      
-      // Sauvegarder les infos utilisateur (simulation)
-      localStorage.setItem('user', JSON.stringify({ email, name: 'Utilisateur' }));
-      
-      // Appeler la fonction de succès pour rediriger vers l'accueil
-      onLoginSuccess();
-      
+    // Validation rapide côté client avant envoi
+    if (!email || !password) {
+      setError('Veuillez remplir tous les champs');
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    try {
+      const data = await login({ email, password });
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+      onLoginSuccess();
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Simulation de connexion avec Google
-  const handleGoogleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify({ email: 'user@gmail.com', name: 'Google User' }));
-      onLoginSuccess();
-      setIsLoading(false);
-    }, 1000);
-  };
+  // 2. Connexion avec Google via l'API @react-oauth/google
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
+      setError('');
+      try {
+          const data = await loginWithGoogle(tokenResponse.access_token);
 
-  // Simulation de connexion avec Facebook
+        localStorage.setItem('user', JSON.stringify(data.user));
+        onLoginSuccess();
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      setError('La connexion avec Google a échoué.');
+      setIsLoading(false);
+    }
+  });
+
+  // Connexion avec Facebook (Laissé en stand-by pour le moment)
   const handleFacebookLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify({ email: 'user@facebook.com', name: 'Facebook User' }));
-      onLoginSuccess();
-      setIsLoading(false);
-    }, 1000);
+    setError("La connexion via Facebook n'est pas encore configurée.");
   };
 
   return (
@@ -86,7 +80,7 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
               Sign in to start managing your projects.
             </p>
 
-            {/* Message d'erreur */}
+            {/* Message d'erreur dynamique */}
             {error && (
               <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-600 text-xs">{error}</p>
@@ -176,7 +170,8 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
 
             <div className="space-y-1.5">
               <button
-                onClick={handleGoogleLogin}
+                type="button"
+                onClick={() => handleGoogleLogin()}
                 disabled={isLoading}
                 className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200 text-xs disabled:opacity-50"
               >
@@ -185,6 +180,7 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
               </button>
 
               <button
+                type="button"
                 onClick={handleFacebookLogin}
                 disabled={isLoading}
                 className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition duration-200 text-xs disabled:opacity-50"
@@ -207,19 +203,12 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
             </p>
 
             <p className="text-center text-[10px] text-gray-400 mt-3">
-              © 2025 ALL RIGHTS RESERVED
+              © 2026 ALL RIGHTS RESERVED
             </p>
-
-            {/* Infos de démo */}
-            <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
-              <p className="text-blue-600 text-[10px] text-center">
-                🔐 Démo : n'importe quel email + mot de passe (8+ caractères)
-              </p>
-            </div>
           </div>
         </div>
 
-        {/* Image avec animation au survol */}
+        {/* Image de droite */}
         <div className="hidden md:block md:w-1/2 overflow-hidden">
           <div className="h-full overflow-hidden">
             <img

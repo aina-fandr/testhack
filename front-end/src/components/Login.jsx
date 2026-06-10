@@ -219,7 +219,7 @@ export default function Login({ onSwitchToSignUp, onLoginSuccess }) {
           </div>
         </div>
 
-        {/* Image */}
+        {/* Image avec animation au survol */}
         <div className="hidden md:block md:w-1/2 overflow-hidden">
           <div className="h-full overflow-hidden">
             <img

@@ -1,12 +1,14 @@
-// src/pages/IA.jsx
+// 
+// src/pages/IA.jsx - Version avec vraie IA
 import React, { useState, useRef, useEffect } from 'react';
 import { FaPaperPlane, FaRobot, FaUser, FaSpinner } from 'react-icons/fa';
+import { sendMessageToAI } from '../services/ai_service_api';
 
 export default function IA() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre assistant IA. Posez-moi toutes vos questions ! 🤖",
+      text: "Bonjour ! Je suis votre assistant IA (ChatGPT). Posez-moi toutes vos questions ! 🤖",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -14,38 +16,17 @@ export default function IA() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const [conversationHistory, setConversationHistory] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const getAIResponse = async (userMessage) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const responses = {
-      'bonjour': 'Bonjour ! Comment puis-je vous aider aujourd\'hui ?',
-      'ça va': 'Ça va très bien, merci ! Et vous ?',
-      'merci': 'Avec plaisir ! N\'hésitez pas si vous avez d\'autres questions.',
-      'aide': 'Je peux vous aider avec :\n- Répondre à vos questions\n- Vous guider dans l\'application\n- Vous donner des informations sur Madagascar\n- Discuter avec vous !',
-      'madagascar': 'Madagascar est une île magnifique ! Voulez-vous en savoir plus sur les villes, la culture, ou les lieux touristiques ?',
-      'carte': 'Vous pouvez voir la carte de Madagascar dans l\'onglet "Carte" du menu !',
-      'au revoir': 'Au revoir ! À bientôt sur notre plateforme ! 👋',
-    };
-
-    const lowerMessage = userMessage.toLowerCase();
-    for (const [key, response] of Object.entries(responses)) {
-      if (lowerMessage.includes(key)) {
-        return response;
-      }
-    }
-
-    return "Intéressant ! Pouvez-vous m'en dire plus ? Ou posez-moi une question sur Madagascar, l'application, ou simplement discuter ! 😊";
-  };
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    // Ajouter le message de l'utilisateur
     const userMessage = {
       id: Date.now(),
       text: input,
@@ -53,19 +34,38 @@ export default function IA() {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
+    
+    // Sauvegarder l'historique pour l'IA
+    const newHistory = [...conversationHistory, { role: 'user', content: input }];
+    setConversationHistory(newHistory);
+    
     setInput('');
     setIsLoading(true);
 
-    const aiResponse = await getAIResponse(input);
-    
-    const aiMessage = {
-      id: Date.now() + 1,
-      text: aiResponse,
-      sender: 'ai',
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, aiMessage]);
-    setIsLoading(false);
+    try {
+      // Appeler la vraie IA
+      const aiResponse = await sendMessageToAI(input, conversationHistory);
+      
+      const aiMessage = {
+        id: Date.now() + 1,
+        text: aiResponse,
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+      setConversationHistory(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+    } catch (error) {
+      console.error('Erreur:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: "Désolé, une erreur s'est produite. Veuillez réessayer plus tard.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatTime = (date) => {
@@ -76,7 +76,7 @@ export default function IA() {
     <div className="h-full flex flex-col">
       <div className="mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-gray-800">Assistant IA 🤖</h1>
-        <p className="text-gray-500 text-sm">Posez-moi des questions, je suis là pour vous aider !</p>
+        <p className="text-gray-500 text-sm">Alimenté par ChatGPT - Posez-moi toutes vos questions !</p>
       </div>
 
       <div className="flex-1 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
@@ -139,7 +139,7 @@ export default function IA() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Écrivez votre message ici..."
+              placeholder="Posez votre question à ChatGPT..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               disabled={isLoading}
             />
@@ -153,7 +153,7 @@ export default function IA() {
           </div>
           
           <div className="mt-3 flex flex-wrap gap-2">
-            {['Bonjour', 'Aide', 'Madagascar', 'Carte', 'Merci', 'Au revoir'].map((suggestion) => (
+            {['Que peux-tu faire ?', 'Parle-moi de Madagascar', 'Aide-moi', 'Merci'].map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"

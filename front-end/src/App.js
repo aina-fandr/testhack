@@ -1,6 +1,6 @@
-// src/App.js - CORRIGÉ
+// src/App.js
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import Layout from './components/Layout/Layout';
@@ -10,33 +10,36 @@ import IA from './pages/IA';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [loading, setLoading] = useState(true);
 
-  // Vérifier si l'utilisateur est déjà connecté au chargement
   useEffect(() => {
+    const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    if (user) {
+    
+    if (token && user) {
       setIsAuthenticated(true);
-      // Rediriger vers l'accueil si connecté et sur une page d'auth
-      if (location.pathname === '/login' || location.pathname === '/signup') {
-        navigate('/');
-      }
     }
-  }, [location.pathname, navigate]);
+    setLoading(false);
+  }, []);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    navigate('/');
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     setIsAuthenticated(false);
-    navigate('/login');
   };
 
-  // Si non authentifié
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#05070d] flex items-center justify-center">
+        <div className="text-white">Chargement...</div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <Routes>
@@ -47,15 +50,12 @@ function App() {
     );
   }
 
-  // Si authentifié - C'EST ICI qu'il faut mettre la route /ia
   return (
     <Layout onLogout={handleLogout}>
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/carte" element={<Carte />} />
-        <Route path="/ia" element={<IA />} />  {/* ← Route IA ici, dans la partie authentifiée */}
-        <Route path="/profile" element={<div>Page Profil</div>} />
-        <Route path="/settings" element={<div>Page Paramètres</div>} />
+        <Route path="/ia" element={<IA />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

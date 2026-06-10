@@ -5,18 +5,22 @@ const session = require('express-session');
 const passport = require('./config/passport');
 const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const aiRoutes = require('./routes/aiRoutes'); // ⬅️ AJOUTER
 
 // Charger les variables d'environnement EN PREMIER
 dotenv.config();
 
 const app = express();
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
 // Middlewares
+app.use(cors({ 
+    origin: FRONTEND_URL, 
+    credentials: true 
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 
 // Session (OBLIGATOIRE pour passport)
 app.use(session({
@@ -24,8 +28,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,  // true si HTTPS
-        maxAge: 24 * 60 * 60 * 1000 // 24h
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
@@ -38,6 +42,7 @@ connectDB();
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/api/ai', aiRoutes); // ⬅️ AJOUTER - correspond à /api/ai/chat du frontend
 
 // Route de test
 app.get('/', (req, res) => {
@@ -45,7 +50,7 @@ app.get('/', (req, res) => {
 });
 
 // Démarrer le serveur
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000; // ⬅️ CHANGÉ de 3000 à 5000
 app.listen(PORT, () => {
     console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });

@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js - CORRIGÉ
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Login from './components/Login';
@@ -6,6 +6,7 @@ import SignUp from './components/SignUp';
 import Layout from './components/Layout/Layout';
 import Accueil from './pages/Accueil';
 import Carte from './pages/Carte';
+import IA from './pages/IA';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -46,12 +47,15 @@ function App() {
     );
   }
 
-  // Si authentifié
+  // Si authentifié - C'EST ICI qu'il faut mettre la route /ia
   return (
     <Layout onLogout={handleLogout}>
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/carte" element={<Carte />} />
+        <Route path="/ia" element={<IA />} />  {/* ← Route IA ici, dans la partie authentifiée */}
+        <Route path="/profile" element={<div>Page Profil</div>} />
+        <Route path="/settings" element={<div>Page Paramètres</div>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

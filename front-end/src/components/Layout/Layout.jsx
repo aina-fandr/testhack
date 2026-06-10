@@ -1,7 +1,8 @@
 // src/components/Layout/Layout.jsx
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom'; // Supprimez 'Link' de l'import
+import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import ChatFloating from './ChatFloating'; // Ajoutez cet import
 
 export default function Layout({ children, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,7 +13,9 @@ export default function Layout({ children, onLogout }) {
       case '/':
         return 'Accueil';
       case '/carte':
-        return 'Mes cartes';
+        return 'Carte de Madagascar';
+      case '/ia':
+        return 'Assistant IA';
       case '/profile':
         return 'Profil';
       case '/settings':
@@ -23,7 +26,7 @@ export default function Layout({ children, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="h-screen overflow-hidden bg-gray-100 flex">
       <Sidebar 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen} 
@@ -48,6 +51,9 @@ export default function Layout({ children, onLogout }) {
           {children}
         </main>
       </div>
+
+      {/* Chat flottant - disponible sur toutes les pages */}
+      <ChatFloating />
     </div>
   );
 }

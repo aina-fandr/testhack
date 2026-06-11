@@ -9,7 +9,6 @@ import {
   fadeInLeft,
   fadeInRight,
   scaleIn,
-  hoverScale,
   AnimatedBackground,
   SuccessOverlay,
   LoadingSpinner
@@ -23,7 +22,7 @@ export default function Login({ onLoginSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-
+  // src/components/Login.jsx - Modifie la partie succès
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -49,14 +48,26 @@ export default function Login({ onLoginSuccess }) {
       }
 
       setShowSuccess(true);
+
+      // Créer un objet utilisateur complet
+      const userData = {
+        id: Date.now(),
+        email,
+        name: email.split('@')[0],
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+
+      // Sauvegarder dans localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', 'fake-jwt-token-' + Date.now());
+
       setTimeout(() => {
-        localStorage.setItem('user', JSON.stringify({ email, name: 'Utilisateur' }));
-        onLoginSuccess();
+        onLoginSuccess(userData); // Passer l'utilisateur
         setIsLoading(false);
       }, 1000);
     }, 1500);
   };
-
   const handleGoogleLogin = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -75,14 +86,14 @@ export default function Login({ onLoginSuccess }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#05070d] to-[#1a1a2e] flex items-center justify-center p-4 overflow-hidden relative">
-      
+
       <AnimatedBackground />
 
       <motion.div
         {...scaleIn}
         className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full flex flex-col md:flex-row relative z-10"
       >
-        
+
         <div className="w-full md:w-1/2 flex items-center justify-center p-5">
           <motion.div {...fadeInLeft} className="w-full max-w-xs">
             <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent mb-1 text-center md:text-left">
@@ -154,9 +165,8 @@ export default function Login({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-1.5 rounded-lg font-medium transition-all duration-300 mt-1 flex items-center justify-center gap-2 ${
-                  isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:shadow-lg'
-                } text-white`}
+                className={`w-full py-1.5 rounded-lg font-medium transition-all duration-300 mt-1 flex items-center justify-center gap-2 ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:shadow-lg'
+                  } text-white`}
               >
                 {isLoading ? (
                   <>
@@ -183,7 +193,7 @@ export default function Login({ onLoginSuccess }) {
               >
                 <FcGoogle size={14} /> Sign in with Google
               </button>
-              
+
               <button
                 onClick={handleFacebookLogin}
                 disabled={isLoading}

@@ -5,7 +5,8 @@ const session = require('express-session');
 const passport = require('./config/passport');
 const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
-const aiRoutes = require('./routes/aiRoutes'); // ⬅️ AJOUTER
+const aiRoutes = require('./routes/aiRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // ⬅️ AJOUTER
 
 // Charger les variables d'environnement EN PREMIER
 dotenv.config();
@@ -42,7 +43,8 @@ connectDB();
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/api/ai', aiRoutes); // ⬅️ AJOUTER - correspond à /api/ai/chat du frontend
+app.use('/api/ai', aiRoutes);
+app.use('/api/admin', adminRoutes); // ⬅️ AJOUTER - pour la liste des utilisateurs
 
 // Route de test
 app.get('/', (req, res) => {
@@ -50,7 +52,7 @@ app.get('/', (req, res) => {
 });
 
 // Démarrer le serveur
-const PORT = process.env.PORT || 5000; // ⬅️ CHANGÉ de 3000 à 5000
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });

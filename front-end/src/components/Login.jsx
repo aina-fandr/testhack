@@ -1,4 +1,4 @@
-// src/components/Login.jsx
+// src/components/SignUp.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from "react-icons/fc";
@@ -10,74 +10,98 @@ import {
   fadeInRight,
   scaleIn,
   AnimatedBackground,
-  SuccessOverlay,
-  LoadingSpinner
+  LoadingSpinner,
+  AnimatedInput,
+  AnimatedButton
 } from '../animations/sharedAnimations';
 
-export default function Login({ onLoginSuccess }) {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+export default function SignUp({ onSignUpSuccess }) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
-  // src/components/Login.jsx - Modifie la partie succès
+
+  // ✅ VRAIE INSCRIPTION VERS LE BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validation côté client
+    if (!fullName.trim()) {
+      setError("Le nom complet est requis");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("L'email est requis");
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError("Veuillez entrer un email valide");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
+      return;
+    }
+
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (!email || !password) {
-        setError('Veuillez remplir tous les champs');
-        setIsLoading(false);
-        return;
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email: email,
+          password: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Inscription réussie
+        setSuccessMessage(`Compte créé avec succès ! Bienvenue ${fullName} !`);
+        setShowSuccess(true);
+        
+        // Rediriger vers login après 2 secondes
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate('/login');
+        }, 2000);
+      } else {
+        setError(data.message || 'Erreur lors de l\'inscription');
       }
-
-      if (password.length < 8) {
-        setError('Le mot de passe doit contenir au moins 8 caractères');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!email.includes('@')) {
-        setError('Veuillez entrer un email valide');
-        setIsLoading(false);
-        return;
-      }
-
-      setShowSuccess(true);
-
-      // Créer un objet utilisateur complet
-      const userData = {
-        id: Date.now(),
-        email,
-        name: email.split('@')[0],
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
-
-      // Sauvegarder dans localStorage
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', 'fake-jwt-token-' + Date.now());
-
-      setTimeout(() => {
-        onLoginSuccess(userData); // Passer l'utilisateur
-        setIsLoading(false);
-      }, 1000);
-    }, 1500);
+    } catch (error) {
+      console.error('❌ Erreur d\'inscription:', error);
+      setError('Impossible de se connecter au serveur. Vérifiez que le backend est démarré.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // ✅ VRAIE CONNEXION GOOGLE
   const handleGoogleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setShowSuccess(true);
-      setTimeout(() => {
-        localStorage.setItem('user', JSON.stringify({ email: 'user@gmail.com', name: 'Google User' }));
-        onLoginSuccess();
-        setIsLoading(false);
-      }, 1000);
-    }, 1000);
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const handleFacebookLogin = () => {
@@ -86,20 +110,20 @@ export default function Login({ onLoginSuccess }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#05070d] to-[#1a1a2e] flex items-center justify-center p-4 overflow-hidden relative">
-
+      
       <AnimatedBackground />
 
       <motion.div
         {...scaleIn}
         className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full flex flex-col md:flex-row relative z-10"
       >
-
+        
         <div className="w-full md:w-1/2 flex items-center justify-center p-5">
           <motion.div {...fadeInLeft} className="w-full max-w-xs">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent mb-1 text-center md:text-left">
-              Welcome Back 🎉
+            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-purple-600 bg-clip-text text-transparent mb-1 text-center md:text-left">
+              Create Account ✨
             </h1>
-            <p className="text-gray-500 text-xs mb-4 text-center md:text-left">Sign in to start managing your projects.</p>
+            <p className="text-gray-500 text-xs mb-4 text-center md:text-left">Join us and start managing your projects.</p>
 
             <AnimatePresence>
               {error && (
@@ -115,31 +139,37 @@ export default function Login({ onLoginSuccess }) {
             </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-2">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-0.5">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@gmail.com"
-                  className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all duration-300"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+              <AnimatedInput
+                type="text"
+                label="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Doe"
+                required
+                disabled={isLoading}
+              />
+
+              <AnimatedInput
+                type="email"
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@gmail.com"
+                required
+                disabled={isLoading}
+              />
 
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-0.5">Password</label>
                 <div className="relative">
-                  <input
+                  <AnimatedInput
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-7 text-sm transition-all duration-300"
                     required
-                    minLength={8}
                     disabled={isLoading}
+                    className="pr-7"
                   />
                   <button
                     type="button"
@@ -152,31 +182,36 @@ export default function Login({ onLoginSuccess }) {
                 </div>
               </div>
 
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="text-xs text-blue-500 hover:text-blue-600"
-                  disabled={isLoading}
-                >
-                  Forgot Password?
-                </button>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-0.5">Confirm Password</label>
+                <div className="relative">
+                  <AnimatedInput
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    required
+                    disabled={isLoading}
+                    className="pr-7"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    disabled={isLoading}
+                  >
+                    {showConfirmPassword ? <AiOutlineEyeInvisible size={14} /> : <AiOutlineEye size={14} />}
+                  </button>
+                </div>
               </div>
 
-              <button
+              <AnimatedButton
                 type="submit"
+                isLoading={isLoading}
                 disabled={isLoading}
-                className={`w-full py-1.5 rounded-lg font-medium transition-all duration-300 mt-1 flex items-center justify-center gap-2 ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:shadow-lg'
-                  } text-white`}
               >
-                {isLoading ? (
-                  <>
-                    <LoadingSpinner size="w-4 h-4" color="border-white" />
-                    <span>Connexion...</span>
-                  </>
-                ) : (
-                  <span>Sign In</span>
-                )}
-              </button>
+                Sign Up
+              </AnimatedButton>
             </form>
 
             <div className="flex items-center gap-2 my-3">
@@ -189,29 +224,29 @@ export default function Login({ onLoginSuccess }) {
               <button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 text-xs disabled:opacity-50"
+                className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 text-xs disabled:opacity-50 transition-all duration-300"
               >
-                <FcGoogle size={14} /> Sign in with Google
+                <FcGoogle size={14} /> Sign up with Google
               </button>
-
+              
               <button
                 onClick={handleFacebookLogin}
                 disabled={isLoading}
-                className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 text-xs disabled:opacity-50"
+                className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 text-xs disabled:opacity-50 transition-all duration-300"
               >
-                <FaFacebookF className="text-blue-600" size={12} /> Sign in with Facebook
+                <FaFacebookF className="text-blue-600" size={12} /> Sign up with Facebook
               </button>
             </div>
 
             <p className="text-center text-xs text-gray-500 mt-3">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <button
                 type="button"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/login')}
                 className="text-blue-600 font-medium hover:underline transition"
                 disabled={isLoading}
               >
-                Sign Up
+                Sign In
               </button>
             </p>
 
@@ -222,8 +257,8 @@ export default function Login({ onLoginSuccess }) {
         <motion.div {...fadeInRight} className="hidden md:block md:w-1/2 overflow-hidden">
           <div className="h-full overflow-hidden relative">
             <img
-              src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=500&fit=crop"
-              alt="flowers"
+              src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&h=500&fit=crop"
+              alt="coffee shop"
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             />
           </div>
@@ -231,12 +266,68 @@ export default function Login({ onLoginSuccess }) {
 
       </motion.div>
 
-      <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
+      {/* Modal de succès */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, y: -50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.5, opacity: 0, y: 50 }}
+              transition={{ type: "spring", damping: 15, duration: 0.5 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", damping: 10 }}
+                className="w-24 h-24 mx-auto mb-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center"
+              >
+                <motion.svg
+                  className="w-12 h-12 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <motion.path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  />
+                </motion.svg>
+              </motion.div>
+              
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Inscription réussie ! 🎉</h2>
+              <p className="text-gray-600 mb-4">{successMessage}</p>
+              <p className="text-sm text-gray-500">Redirection vers la page de connexion...</p>
+              
+              <div className="mt-4 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2, ease: "linear" }}
+                  className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Loader pendant l'inscription */}
       {isLoading && !showSuccess && (
         <div className="fixed bottom-4 right-4 z-50 bg-white rounded-full shadow-lg p-3 flex items-center gap-3">
-          <LoadingSpinner size="w-5 h-5" color="border-blue-500" />
-          <span className="text-xs text-gray-600">Connexion en cours...</span>
+          <LoadingSpinner size="w-5 h-5" color="border-purple-500" />
+          <span className="text-xs text-gray-600">Création du compte...</span>
         </div>
       )}
     </div>

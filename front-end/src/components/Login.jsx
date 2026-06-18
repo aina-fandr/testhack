@@ -14,6 +14,8 @@ import {
   LoadingSpinner
 } from '../animations/sharedAnimations';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,62 +24,51 @@ export default function Login({ onLoginSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-  // src/components/Login.jsx - Modifie la partie succès
+
+  // ✅ VRAIE CONNEXION VERS LE BACKEND
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (!email || !password) {
-        setError('Veuillez remplir tous les champs');
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        // Sauvegarder le token et l'utilisateur
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        console.log('✅ Connexion réussie:', data.user);
+        
+        setShowSuccess(true);
+        setTimeout(() => {
+          onLoginSuccess(data.user);
+          setIsLoading(false);
+        }, 1000);
+      } else {
+        setError(data.message || 'Email ou mot de passe invalide');
         setIsLoading(false);
-        return;
       }
-
-      if (password.length < 8) {
-        setError('Le mot de passe doit contenir au moins 8 caractères');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!email.includes('@')) {
-        setError('Veuillez entrer un email valide');
-        setIsLoading(false);
-        return;
-      }
-
-      setShowSuccess(true);
-
-      // Créer un objet utilisateur complet
-      const userData = {
-        id: Date.now(),
-        email,
-        name: email.split('@')[0],
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
-
-      // Sauvegarder dans localStorage
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', 'fake-jwt-token-' + Date.now());
-
-      setTimeout(() => {
-        onLoginSuccess(userData); // Passer l'utilisateur
-        setIsLoading(false);
-      }, 1000);
-    }, 1500);
+    } catch (error) {
+      console.error('❌ Erreur de connexion:', error);
+      setError('Impossible de se connecter au serveur. Vérifiez que le backend est démarré.');
+      setIsLoading(false);
+    }
   };
+
+  // ✅ VRAIE CONNEXION GOOGLE
   const handleGoogleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setShowSuccess(true);
-      setTimeout(() => {
-        localStorage.setItem('user', JSON.stringify({ email: 'user@gmail.com', name: 'Google User' }));
-        onLoginSuccess();
-        setIsLoading(false);
-      }, 1000);
-    }, 1000);
+    // Rediriger vers l'endpoint Google du backend
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const handleFacebookLogin = () => {
@@ -165,8 +156,9 @@ export default function Login({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-1.5 rounded-lg font-medium transition-all duration-300 mt-1 flex items-center justify-center gap-2 ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:shadow-lg'
-                  } text-white`}
+                className={`w-full py-1.5 rounded-lg font-medium transition-all duration-300 mt-1 flex items-center justify-center gap-2 ${
+                  isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-gray-800 to-gray-900 hover:shadow-lg'
+                } text-white`}
               >
                 {isLoading ? (
                   <>

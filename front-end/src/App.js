@@ -14,27 +14,27 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
+  // Vérifier l'authentification au chargement
   useEffect(() => {
-    // Vérifier le token au chargement de l'application
     const checkAuth = () => {
       const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      const userData = localStorage.getItem('user');
       
-      console.log('Vérification auth - token:', !!token, 'user:', !!storedUser);
+      console.log('🔍 Vérification auth - token:', !!token, 'user:', !!userData);
       
-      if (token && storedUser) {
+      if (token && userData) {
         try {
-          const parsedUser = JSON.parse(storedUser);
+          const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
           setIsAuthenticated(true);
-          console.log('Utilisateur authentifié:', parsedUser);
+          console.log('✅ Utilisateur authentifié:', parsedUser);
         } catch (error) {
-          console.error('Erreur parsing user:', error);
+          console.error('❌ Erreur parsing user:', error);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
       } else {
-        console.log('Non authentifié');
+        console.log('❌ Non authentifié');
       }
       setLoading(false);
     };
@@ -43,7 +43,7 @@ function App() {
   }, []);
 
   const handleLogin = (userData) => {
-    console.log('handleLogin appelé', userData);
+    console.log('🔑 Login appelé', userData);
     setIsAuthenticated(true);
     if (userData) {
       setUser(userData);
@@ -51,12 +51,14 @@ function App() {
   };
 
   const handleLogout = () => {
+    console.log('🚪 Déconnexion');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
   };
 
+  // Écran de chargement
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#05070d] to-[#1a1a2e] flex items-center justify-center">
@@ -68,6 +70,7 @@ function App() {
     );
   }
 
+  // Non authentifié - routes login/signup
   if (!isAuthenticated) {
     return (
       <Routes>
@@ -78,6 +81,7 @@ function App() {
     );
   }
 
+  // Authentifié - routes principales
   return (
     <Layout onLogout={handleLogout}>
       <Routes>

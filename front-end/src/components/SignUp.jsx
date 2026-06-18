@@ -15,6 +15,8 @@ import {
   AnimatedButton
 } from '../animations/sharedAnimations';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function SignUp({ onSignUpSuccess }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,11 +30,12 @@ export default function SignUp({ onSignUpSuccess }) {
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // ✅ VRAIE INSCRIPTION VERS LE BACKEND
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation
+    // Validation côté client
     if (!fullName.trim()) {
       setError("Le nom complet est requis");
       return;
@@ -60,39 +63,49 @@ export default function SignUp({ onSignUpSuccess }) {
 
     setIsLoading(true);
 
-    // Simulation d'inscription (à remplacer par ton API)
-    setTimeout(() => {
-      // Sauvegarde simulée
-      const newUser = {
-        id: Date.now(),
-        name: fullName,
-        email: email,
-        createdAt: new Date().toISOString()
-      };
-      
-      // Sauvegarder dans localStorage (simulation)
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      // Afficher le message de succès
-      setSuccessMessage(`Compte créé avec succès ! Bienvenue ${fullName} !`);
-      setShowSuccess(true);
-      
-      // Rediriger vers login après 2 secondes
-      setTimeout(() => {
-        setShowSuccess(false);
-        // Rediriger vers la page de connexion
-        navigate('/login');
-      }, 2000);
-      
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email: email,
+          password: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Inscription réussie
+        setSuccessMessage(`Compte créé avec succès ! Bienvenue ${fullName} !`);
+        setShowSuccess(true);
+        
+        // Rediriger vers login après 2 secondes
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate('/login');
+        }, 2000);
+      } else {
+        setError(data.message || 'Erreur lors de l\'inscription');
+      }
+    } catch (error) {
+      console.error('❌ Erreur d\'inscription:', error);
+      setError('Impossible de se connecter au serveur. Vérifiez que le backend est démarré.');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
+  // ✅ VRAIE CONNEXION GOOGLE
   const handleGoogleLogin = () => {
-    // À implémenter avec ton backend
-    setError('Connexion Google bientôt disponible');
+    window.location.href = `${API_URL}/auth/google`;
+  };
+
+  const handleFacebookLogin = () => {
+    setError('Connexion Facebook bientôt disponible');
   };
 
   return (
@@ -217,6 +230,7 @@ export default function SignUp({ onSignUpSuccess }) {
               </button>
               
               <button
+                onClick={handleFacebookLogin}
                 disabled={isLoading}
                 className="w-full border border-gray-200 rounded-lg py-1.5 flex items-center justify-center gap-2 hover:bg-gray-50 text-xs disabled:opacity-50 transition-all duration-300"
               >
@@ -252,7 +266,7 @@ export default function SignUp({ onSignUpSuccess }) {
 
       </motion.div>
 
-      {/* Modal de succès personnalisé */}
+      {/* Modal de succès */}
       <AnimatePresence>
         {showSuccess && (
           <motion.div
@@ -268,7 +282,6 @@ export default function SignUp({ onSignUpSuccess }) {
               transition={{ type: "spring", damping: 15, duration: 0.5 }}
               className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center"
             >
-              {/* Animation de succès */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -293,11 +306,10 @@ export default function SignUp({ onSignUpSuccess }) {
                 </motion.svg>
               </motion.div>
               
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Inscription réussie ! </h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Inscription réussie ! 🎉</h2>
               <p className="text-gray-600 mb-4">{successMessage}</p>
               <p className="text-sm text-gray-500">Redirection vers la page de connexion...</p>
               
-              {/* Barre de progression */}
               <div className="mt-4 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <motion.div
                   initial={{ width: "0%" }}
